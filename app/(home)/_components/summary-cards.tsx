@@ -5,54 +5,20 @@ import {
   WalletIcon,
 } from "lucide-react";
 import SummaryCard from "./summary-card";
-import { db } from "@/app/_lib/prisma";
-import { TransactionType } from "@prisma/client";
 
 interface SummaryCardProps {
-  month?: string;
+  balance: number;
+  depositsTotal: number;
+  investmentsTotal: number;
+  expensesTotal: number;
 }
 
-const SummaryCards = async ({ month }: SummaryCardProps) => {
-  const getYear = () => {
-    const date = new Date();
-    return date.getFullYear();
-  };
-
-  const where = {
-    date: {
-      gte: new Date(`${getYear()}-${month}-01`),
-      lt: new Date(`${getYear()}-${month}-31`),
-    },
-  };
-
-  const depositTotal = Number(
-    (
-      await db.transaction.aggregate({
-        where: { ...where, type: TransactionType.DEPOSIT },
-        _sum: { amount: true },
-      })
-    )?._sum?.amount,
-  );
-
-  const investmentTotal = Number(
-    (
-      await db.transaction.aggregate({
-        where: { ...where, type: TransactionType.INVESTMENT },
-        _sum: { amount: true },
-      })
-    )?._sum?.amount,
-  );
-
-  const expensesTotal = Number(
-    (
-      await db.transaction.aggregate({
-        where: { ...where, type: TransactionType.EXPENSE },
-        _sum: { amount: true },
-      })
-    )?._sum?.amount,
-  );
-
-  const balance = depositTotal - investmentTotal - expensesTotal;
+const SummaryCards = async ({
+  balance,
+  depositsTotal,
+  investmentsTotal,
+  expensesTotal,
+}: SummaryCardProps) => {
   return (
     <div className="space-y-6">
       <SummaryCard
@@ -66,12 +32,12 @@ const SummaryCards = async ({ month }: SummaryCardProps) => {
         <SummaryCard
           icon={<PiggyBankIcon size={16} />}
           title="Investido"
-          amount={investmentTotal}
+          amount={investmentsTotal}
         />
         <SummaryCard
           icon={<TrendingUpIcon size={16} className="text-primary" />}
           title="Receita"
-          amount={depositTotal}
+          amount={depositsTotal}
         />
         <SummaryCard
           icon={<TrendingDownIcon size={16} className="text-red-500" />}
