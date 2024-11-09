@@ -17,12 +17,14 @@ import { generateAiReport } from "../_actions/generate-ai-report";
 import { useState } from "react";
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
 import remarkGfm from "remark-gfm";
+import Link from "next/link";
 
 interface AiReportButtonProps {
+  hasPremiuumPlan: boolean;
   month: string;
 }
 
-const AiReportButton = ({ month }: AiReportButtonProps) => {
+const AiReportButton = ({ month, hasPremiuumPlan }: AiReportButtonProps) => {
   const [report, setReport] = useState<string | null>(null);
   const [reportIsLoading, setReportIsLoading] = useState(false);
 
@@ -48,33 +50,59 @@ const AiReportButton = ({ month }: AiReportButtonProps) => {
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Relatório com IA</DialogTitle>
-            <DialogDescription>
-              Use inteligência artificial para gerar um relatório com insights
-              sobre suas finanças.
-            </DialogDescription>
-          </DialogHeader>
-          {report && (
-            <ScrollArea className="prose prose-slate max-h-[450px] text-white marker:text-white prose-h3:text-white prose-h4:text-white prose-strong:text-white">
-              <Markdown remarkPlugins={[remarkGfm]}>{report}</Markdown>
-            </ScrollArea>
+          {hasPremiuumPlan ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Relatório com IA</DialogTitle>
+                <DialogDescription>
+                  Use inteligência artificial para gerar um relatório com
+                  insights sobre suas finanças.
+                </DialogDescription>
+              </DialogHeader>
+              {report && (
+                <ScrollArea className="prose prose-slate max-h-[450px] text-white marker:text-white prose-h3:text-white prose-h4:text-white prose-strong:text-white">
+                  <Markdown remarkPlugins={[remarkGfm]}>{report}</Markdown>
+                </ScrollArea>
+              )}
+              <DialogFooter>
+                <DialogClose>
+                  <Button variant="ghost" className="font-bold">
+                    Cancelar
+                  </Button>
+                </DialogClose>
+                <Button
+                  onClick={handleGenerateReportClick}
+                  disabled={reportIsLoading}
+                  className="font-bold"
+                >
+                  {reportIsLoading && (
+                    <Loader2Icon className="mr-1 animate-spin" />
+                  )}
+                  {reportIsLoading ? "Gerando relatório..." : "Gerar relatório"}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>Relatório com IA</DialogTitle>
+                <DialogDescription>
+                  Você precisa de um plano premium para gerar relatórios com IA.
+                </DialogDescription>
+              </DialogHeader>
+
+              <DialogFooter>
+                <DialogClose>
+                  <Button variant="ghost" className="font-bold">
+                    Cancelar
+                  </Button>
+                </DialogClose>
+                <Button asChild>
+                  <Link href="/subscription">Assinar plano premium</Link>
+                </Button>
+              </DialogFooter>
+            </>
           )}
-          <DialogFooter>
-            <DialogClose>
-              <Button variant="ghost" className="font-bold">
-                Cancelar
-              </Button>
-            </DialogClose>
-            <Button
-              onClick={handleGenerateReportClick}
-              disabled={reportIsLoading}
-              className="font-bold"
-            >
-              {reportIsLoading && <Loader2Icon className="mr-1 animate-spin" />}
-              {reportIsLoading ? "Gerando relatório..." : "Gerar relatório"}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
